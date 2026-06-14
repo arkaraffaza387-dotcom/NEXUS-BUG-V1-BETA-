@@ -139,30 +139,6 @@
             text-align: center;
         }
 
-        /* Guide System */
-        .guide-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--guide-bg);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-        }
-        .guide-box {
-            background: #1a1a1a;
-            border: 2px solid var(--primary);
-            border-radius: 15px;
-            padding: 20px;
-            max-width: 320px;
-            text-align: center;
-            box-shadow: 0 0 30px var(--primary);
-        }
-
         /* Bug Grid */
         .bug-grid {
             display: grid;
@@ -185,6 +161,7 @@
             flex-direction: column;
             align-items: center;
             gap: 3px;
+            cursor: pointer;
         }
         .bug-btn:active {
             background: var(--primary);
@@ -217,7 +194,6 @@
             border-radius: 4px;
         }
 
-        /* Scrollbar styling */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
@@ -226,15 +202,6 @@
 <body>
 
     <div id="notification" class="notification"></div>
-
-    <!-- GUIDE OVERLAY -->
-    <div id="guide-system" class="guide-overlay hidden">
-        <div class="guide-box">
-            <h3 id="guide-title" style="color:var(--primary); margin-bottom:10px;">PANDUAN</h3>
-            <p id="guide-text" style="font-size:0.85em; margin-bottom:15px;"></p>
-            <button onclick="closeGuide()">MENGERTI</button>
-        </div>
-    </div>
 
     <!-- LOGIN PAGE -->
     <div id="login-page" class="container">
@@ -254,7 +221,7 @@
         
         <div style="margin-top: 15px;">
             <button class="premium-btn" onclick="navigateTo('register-premium-page')">Daftar Akun Premium</button>
-            <button class="secondary" onclick="showRegisterFlow()">Daftar Akun Free</button>
+            <button class="secondary" onclick="navigateTo('reg-step-tiktok')">Daftar Akun Free</button>
         </div>
     </div>
 
@@ -263,7 +230,7 @@
         <h2 style="color:var(--premium);">DAFTAR PREMIUM</h2>
         <div class="input-group">
             <label>KODE VERIFIKASI</label>
-            <input type="password" id="reg-prem-code" placeholder="******">
+            <input type="password" id="reg-prem-code" placeholder="••••••">
         </div>
         <div class="input-group">
             <label>USERNAME BARU</label>
@@ -274,26 +241,28 @@
             <input type="password" id="reg-prem-pass">
         </div>
         <button class="premium-btn" onclick="processRegisterPremium()">AKTIVASI PREMIUM</button>
-        <button class="secondary" onclick="backToLogin()">KEMBALI</button>
+        <button class="secondary" onclick="navigateTo('login-page')">KEMBALI</button>
     </div>
 
-    <!-- REGISTRATION FLOW FREE -->
+    <!-- REGISTRATION FLOW FREE - STEP 1 (TIKTOK) -->
     <div id="reg-step-tiktok" class="container hidden">
         <h2>VERIFIKASI TIKTOK</h2>
         <p style="font-size:0.8em; text-align:center; margin-bottom:15px;">Follow <b>kiboyaslinofake</b> untuk akses 4 hari.</p>
         <button onclick="openTikTok()">FOLLOW TIKTOK</button>
-        <button id="tiktok-next" class="hidden" onclick="showRegStepWA()">LANJUTKAN</button>
-        <button class="secondary" onclick="backToLogin()">BATAL</button>
+        <button id="tiktok-next" class="hidden" onclick="navigateTo('reg-step-wa')">LANJUTKAN</button>
+        <button class="secondary" onclick="navigateTo('login-page')">BATAL</button>
     </div>
 
+    <!-- REGISTRATION FLOW FREE - STEP 2 (WHATSAPP) -->
     <div id="reg-step-wa" class="container hidden">
         <h2>VERIFIKASI KOMUNITAS</h2>
         <p style="font-size:0.8em; text-align:center; margin-bottom:15px;">Gabung Saluran WA kami.</p>
         <button onclick="openWAChannel()">GABUNG SALURAN</button>
-        <button id="wa-next" class="hidden" onclick="navigateTo('register-free-page')">LANJUTKAN</button>
+        <button id="wa-next" class="hidden" onclick="navigateTo('register-free-page')">LANJUTKAN KE PENDAFTARAN</button>
         <button class="secondary" onclick="navigateTo('reg-step-tiktok')">KEMBALI</button>
     </div>
 
+    <!-- REGISTER FREE FORM -->
     <div id="register-free-page" class="container hidden">
         <h2>DAFTAR AKUN FREE</h2>
         <p style="text-align:center; font-size:0.65em; color:var(--danger); margin-bottom:10px;">MASA AKTIF: 4 HARI</p>
@@ -306,7 +275,7 @@
             <input type="password" id="reg-free-pass">
         </div>
         <button onclick="processRegisterFree()">BUAT AKUN FREE</button>
-        <button class="secondary" onclick="backToLogin()">KEMBALI</button>
+        <button class="secondary" onclick="navigateTo('login-page')">KEMBALI</button>
     </div>
 
     <!-- DASHBOARD -->
@@ -358,12 +327,11 @@
 
     <script>
         // --- CONFIG & ENCRYPTION ---
-        const DB_KEY = "nexus_v5_data";
-        const SESSION_KEY = "nexus_v5_session";
-        const GUIDES_SHOWN = "nexus_v5_guides";
+        const DB_KEY = "nexus_v1_data";
+        const SESSION_KEY = "nexus_v1_session";
         
-        // Kode "NEXUS-BUG" di-encode ke Base64 (TKVYVVMtQlVH) agar tidak terbaca langsung
-        const _0x5a2e = "TKVYVVMtQlVH"; 
+        // Kode "NEXUS-BUG" di-encode ke Base64
+        const _0x5a2e = "TkVYVVMtQlVH"; 
         const getSecret = () => atob(_0x5a2e);
 
         // --- DATA BUGS (100 Unik) ---
@@ -391,72 +359,110 @@
         function navigateTo(id) {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            checkGuide(id);
         }
 
-        const guides = {
-            'login-page': { title: "WELCOME", text: "Login atau daftar. Premium (LIFETIME) butuh kode rahasia." },
-            'dashboard-page': { title: "DASHBOARD", text: "Premium dapat 100 bug & Device Lock. Free dapat 50 bug." }
-        };
-
-        function checkGuide(pageId) {
-            let shown = JSON.parse(localStorage.getItem(GUIDES_SHOWN) || "[]");
-            if (guides[pageId] && !shown.includes(pageId)) {
-                document.getElementById('guide-title').innerText = guides[pageId].title;
-                document.getElementById('guide-text').innerText = guides[pageId].text;
-                document.getElementById('guide-system').classList.remove('hidden');
-                shown.push(pageId);
-                localStorage.setItem(GUIDES_SHOWN, JSON.stringify(shown));
-            }
+        // --- REGISTRATION FUNCTIONS ---
+        function openTikTok() { 
+            window.open('https://www.tiktok.com/@kiboyaslinofake', '_blank'); 
+            setTimeout(() => {
+                document.getElementById('tiktok-next').classList.remove('hidden');
+                showNotification("Tombol Lanjutkan sudah aktif!");
+            }, 500);
         }
 
-        function closeGuide() { document.getElementById('guide-system').classList.add('hidden'); }
+        function openWAChannel() { 
+            window.open('https://whatsapp.com/channel/0029VbDBArY9MF8uLpmviF1S', '_blank'); 
+            setTimeout(() => {
+                document.getElementById('wa-next').classList.remove('hidden');
+                showNotification("Tombol Lanjutkan sudah aktif!");
+            }, 500);
+        }
 
-        // --- REGISTRATION ---
-        function showRegisterFlow() { navigateTo('reg-step-tiktok'); }
-        function openTikTok() { window.open('https://www.tiktok.com/@kiboyaslinofake', '_blank'); document.getElementById('tiktok-next').classList.remove('hidden'); }
-        function openWAChannel() { window.open('https://whatsapp.com/channel/0029VbDBArY9MF8uLpmviF1S', '_blank'); document.getElementById('wa-next').classList.remove('hidden'); }
-        function backToLogin() { navigateTo('login-page'); }
+        function getUsers() { 
+            return JSON.parse(localStorage.getItem(DB_KEY) || "[]"); 
+        }
 
-        function getUsers() { return JSON.parse(localStorage.getItem(DB_KEY) || "[]"); }
-        function saveUsers(u) { localStorage.setItem(DB_KEY, JSON.stringify(u)); }
+        function saveUsers(u) { 
+            localStorage.setItem(DB_KEY, JSON.stringify(u)); 
+        }
 
         function processRegisterPremium() {
             const code = document.getElementById('reg-prem-code').value;
             const u = document.getElementById('reg-prem-user').value;
             const p = document.getElementById('reg-prem-pass').value;
-            if (code !== getSecret()) return showNotification("KODE VERIFIKASI TIDAK VALID!");
-            if (u.length < 4) return showNotification("Username min 4 karakter!");
+            
+            if (code !== getSecret()) {
+                showNotification("KODE VERIFIKASI TIDAK VALID!");
+                return;
+            }
+            if (u.length < 4) {
+                showNotification("Username min 4 karakter!");
+                return;
+            }
+            
             let users = getUsers();
-            if (users.find(x => x.username === u)) return showNotification("Username sudah ada!");
+            if (users.find(x => x.username === u)) {
+                showNotification("Username sudah ada!");
+                return;
+            }
+            
             users.push({ username: u, password: p, type: "PREMIUM", expiredAt: "LIFETIME" });
             saveUsers(users);
             showNotification("Premium Aktif!");
-            backToLogin();
+            navigateTo('login-page');
+            document.getElementById('reg-prem-code').value = '';
+            document.getElementById('reg-prem-user').value = '';
+            document.getElementById('reg-prem-pass').value = '';
         }
 
         function processRegisterFree() {
             const u = document.getElementById('reg-free-user').value;
             const p = document.getElementById('reg-free-pass').value;
-            if (u.length < 4) return showNotification("Username min 4 karakter!");
+            
+            if (u.length < 4) {
+                showNotification("Username min 4 karakter!");
+                return;
+            }
+            
             let users = getUsers();
-            const exp = new Date(); exp.setDate(exp.getDate() + 4);
+            if (users.find(x => x.username === u)) {
+                showNotification("Username sudah ada!");
+                return;
+            }
+            
+            const exp = new Date();
+            exp.setDate(exp.getDate() + 4);
+            
             users.push({ username: u, password: p, type: "FREE", expiredAt: exp.toISOString() });
             saveUsers(users);
             showNotification("Akun Free Aktif 4 Hari!");
-            backToLogin();
+            navigateTo('login-page');
+            document.getElementById('reg-free-user').value = '';
+            document.getElementById('reg-free-pass').value = '';
         }
 
         function handleLogin() {
             const u = document.getElementById('login-user').value;
             const p = document.getElementById('login-pass').value;
+            
+            if (!u || !p) {
+                showNotification("Username dan Password harus diisi!");
+                return;
+            }
+            
             const users = getUsers();
             const found = users.find(x => x.username === u && x.password === p);
+            
             if (found) {
-                if (found.expiredAt !== "LIFETIME" && new Date() > new Date(found.expiredAt)) return showNotification("Akun Kadaluarsa!");
+                if (found.expiredAt !== "LIFETIME" && new Date() > new Date(found.expiredAt)) {
+                    showNotification("Akun Kadaluarsa!");
+                    return;
+                }
                 localStorage.setItem(SESSION_KEY, JSON.stringify(found));
                 loadDashboard(found);
-            } else showNotification("Login Gagal!");
+            } else {
+                showNotification("Login Gagal!");
+            }
         }
 
         // --- DASHBOARD LOGIC ---
@@ -474,10 +480,17 @@
             document.getElementById('bug-count').innerText = limit;
 
             if (isPrem) {
-                badge.innerText = "PREMIUM"; badge.style.color = "var(--premium)";
-                exp.innerText = "PERMANENT"; lockSec.classList.remove('hidden');
+                badge.innerText = "PREMIUM";
+                badge.style.color = "var(--premium)";
+                badge.style.borderColor = "var(--premium)";
+                exp.innerText = "PERMANENT";
+                exp.style.color = "var(--premium)";
+                lockSec.classList.remove('hidden');
             } else {
-                badge.innerText = "FREE"; exp.innerText = new Date(acc.expiredAt).toLocaleDateString();
+                badge.innerText = "FREE";
+                badge.style.color = "var(--primary)";
+                exp.innerText = new Date(acc.expiredAt).toLocaleDateString('id-ID');
+                exp.style.color = "#888";
                 lockSec.classList.add('hidden');
             }
 
@@ -485,7 +498,7 @@
                 const name = BUG_TYPES[i] || `BUG_EXT_${i}`;
                 const btn = document.createElement('div');
                 btn.className = "bug-btn" + (i >= 50 ? " prem-only" : "");
-                btn.innerHTML = `<span class="bug-icon">${i % 2 === 0 ? '💥' : '🔥'}</span><span>${name.replace(/_/g, ' ')}</span>`;
+                btn.innerHTML = `<span style="font-size:1.5em;">${i % 2 === 0 ? '💥' : '🔥'}</span><span>${name.replace(/_/g, ' ')}</span>`;
                 btn.onclick = () => sendBug(name);
                 bugList.appendChild(btn);
             }
@@ -495,39 +508,64 @@
             const sender = document.getElementById('lock-sender').value;
             const target = document.getElementById('lock-target').value;
             const code = document.getElementById('lock-code').value;
-            if (!sender || !target || !code) return showNotification("Lengkapi semua data Lock!");
-            addLog(`MENYIAPKAN DEVICE LOCK...`, "info");
+            
+            if (!sender || !target || !code) {
+                showNotification("Lengkapi semua data Lock!");
+                return;
+            }
+            
+            addLog(`MENYIAPKAN DEVICE LOCK...`);
             setTimeout(() => {
-                addLog(`DEVICE ${target} BERHASIL DI-LOCK!`, "success");
+                addLog(`✓ DEVICE ${target} BERHASIL DI-LOCK!`);
                 showNotification("TARGET BERHASIL DI-LOCK!");
             }, 2000);
         }
 
-        function addLog(msg, type = "") {
+        function addLog(msg) {
             const out = document.getElementById('console-output');
             const div = document.createElement('div');
             div.innerText = "> " + msg;
-            if (type) div.style.color = type === "error" ? "red" : (type === "success" ? "#00ff88" : (type === "warn" ? "orange" : "#00ccff"));
             out.appendChild(div);
             out.scrollTop = out.scrollHeight;
         }
 
         function sendBug(type) {
             const target = document.getElementById('target-number').value;
-            if (!target.startsWith('62') || target.length < 11) return showNotification("Nomor target tidak valid!");
-            addLog(`INJEKSI: ${type} KE ${target}...`, "info");
+            if (!target.startsWith('62') || target.length < 11) {
+                showNotification("Nomor target tidak valid!");
+                return;
+            }
+            
+            addLog(`INJEKSI: ${type} KE ${target}...`);
             setTimeout(() => {
-                addLog(`PAYLOAD ${type} BERHASIL TERKIRIM!`, "success");
-                showNotification("BUG TERKIRIM!");
+                addLog(`✓ PAYLOAD ${type} TERKIRIM!`);
+                showNotification("BUG BERHASIL DIKIRIM!");
             }, 1500);
         }
 
-        function logout() { localStorage.removeItem(SESSION_KEY); backToLogin(); }
+        function logout() {
+            localStorage.removeItem(SESSION_KEY);
+            navigateTo('login-page');
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+        }
 
+        // --- INIT ---
         window.onload = () => {
             const s = localStorage.getItem(SESSION_KEY);
-            if (s) loadDashboard(JSON.parse(s)); else navigateTo('login-page');
+            if (s) {
+                const acc = JSON.parse(s);
+                if (acc.expiredAt === "LIFETIME" || new Date() < new Date(acc.expiredAt)) {
+                    loadDashboard(acc);
+                } else {
+                    localStorage.removeItem(SESSION_KEY);
+                    navigateTo('login-page');
+                }
+            } else 
+                navigateTo('login-page');
+            }
         };
     </script>
 </body>
 </html>
+j
