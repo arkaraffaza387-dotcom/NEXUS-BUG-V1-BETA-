@@ -561,11 +561,11 @@
                     localStorage.removeItem(SESSION_KEY);
                     navigateTo('login-page');
                 }
-            } else 
+            } else {
                 navigateTo('login-page');
             }
         };
     </script>
 </body>
 </html>
-j
+
